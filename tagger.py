@@ -116,8 +116,10 @@ class Tagger:
             user_prompt_template_file.write(self.user_prompt)
 
     def run_prompt(self):
+        logger.info("Starting OpenRouter API...")
         with OpenRouter(api_key=os.getenv("OPENROUTER_API_KEY")) as client:
             for model in MODEL_LIST[-2:]:  # FIXME prompt all
+                logger.info(f"Sending request to model: '{model}'")
                 response = client.chat.send(
                     model=model,
                     messages=[
@@ -126,9 +128,12 @@ class Tagger:
                     ]
                 )
 
-                print(model)
+                logger.info(f"Received response from '{model}'")
                 print(response.choices[0].message.content)
+
+                logger.info("Waiting 5 seconds before next request...")
                 time.sleep(5)
+            logger.info("All API calls completed.")
 
 
 if __name__ == "__main__":
