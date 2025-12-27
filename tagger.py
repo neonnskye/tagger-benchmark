@@ -1,6 +1,8 @@
 import logging
 import os
+import re
 import time
+from pathlib import Path
 
 from PIL import Image
 from dotenv import load_dotenv
@@ -23,6 +25,8 @@ JSON_OUTPUT_TEMPLATE_PATH = "templates/prompt/output.json"
 SYSTEM_PROMPT_OUTPUT_PATH = "outputs/prompt/system.md"
 USER_PROMPT_OUTPUT_PATH = "outputs/prompt/user.md"
 
+RESPONSE_OUTPUT_DIR = Path("outputs")
+
 MODEL_LIST = [
     "google/gemini-3-pro-preview",
     "google/gemini-3-flash-preview",
@@ -30,7 +34,7 @@ MODEL_LIST = [
     "anthropic/claude-sonnet-4.5",
     "anthropic/claude-opus-4.5",
     "x-ai/grok-4",
-    "openai/gpt-5"
+    "openai/gpt-5",
     "openai/gpt-5.2",
     "openai/o4-mini-high",
     "deepseek/deepseek-v3.2",
@@ -118,18 +122,25 @@ class Tagger:
     def run_prompt(self):
         logger.info("Starting OpenRouter API...")
         with OpenRouter(api_key=os.getenv("OPENROUTER_API_KEY")) as client:
-            for model in MODEL_LIST[-2:]:  # FIXME prompt all
-                logger.info(f"Sending request to model: '{model}'")
+            for model_name in MODEL_LIST[-2:]:  # FIXME prompt all
+                logger.info(f"Sending request to model: '{model_name}'")
                 response = client.chat.send(
-                    model=model,
+                    model=model_name,
                     messages=[
                         {"role": "system", "content": self.system_prompt},
                         {"role": "user", "content": self.user_prompt}
                     ]
                 )
+                logger.info(f"Received response from '{model_name}'")
 
-                logger.info(f"Received response from '{model}'")
-                print(response.choices[0].message.content)
+                match = re.search(r"/(.*)", model_name)
+                if match:
+                    file_name = match.group(1)
+                output_path = RESPONSE_OUTPUT_DIR / f"{file_name}.md"
+
+                logger.info(f"Writing response to '{output_path}'")
+                with open(output_path, "w", encoding="utf-8") as output_file:
+                    output_file.write(response.choices[0].message.content)
 
                 logger.info("Waiting 5 seconds before next request...")
                 time.sleep(5)
