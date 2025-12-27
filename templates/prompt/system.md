@@ -24,7 +24,6 @@ Begin with a concise checklist (3–7 bullets) of what you will do; keep items c
 - Use weak WD14 tags (< 0.40) only if strongly reinforced by the caption
 - Follow each category’s description exactly as provided in the global Tumblr tag pool
 - Do not introduce themes, contexts, or attributes not visible in the image
-- When in doubt, select the more general or conservative tag
 
 # Output Format (Strict JSON)
 
