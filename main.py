@@ -29,8 +29,8 @@ IMAGE_METADATA_TEMPLATE = """## Image {}
 "{}"
 ```"""
 
-PROMPT_TEMPLATE_PATH = "prompts/template.md"
-PROMPT_OUTPUT_PATH = "prompts/generated.md"
+PROMPT_TEMPLATE_PATH = "templates/prompt.md"
+PROMPT_OUTPUT_PATH = "outputs/prompt.md"
 
 
 class Tagger:
@@ -41,13 +41,13 @@ class Tagger:
         self.wdtagger_results = None
         self.run_wdtagger()
 
-        self.prepare_prompt()
+        self.generate_prompt()
 
     def run_wdtagger(self):
         images = [Image.open(image_path) for image_path in self.image_list]
         self.wdtagger_results = self.wdtagger.tag(images)
 
-    def prepare_prompt(self):
+    def generate_prompt(self):
         with open(PROMPT_TEMPLATE_PATH, "r", encoding="utf-8") as prompt_template_file:
             prompt_template = prompt_template_file.read()
 
@@ -62,8 +62,10 @@ class Tagger:
             image_metadata = IMAGE_METADATA_TEMPLATE.format(idx, image_tags, image_caption)
             prompt_template_args.append(image_metadata)
 
+        generated_prompt = prompt_template.format(*prompt_template_args)
+        
         with open(PROMPT_OUTPUT_PATH, "w", encoding="utf-8") as prompt_output_file:
-            prompt_output_file.write(prompt_template.format(*prompt_template_args))
+            prompt_output_file.write(generated_prompt)
 
 
 if __name__ == "__main__":
