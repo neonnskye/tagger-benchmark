@@ -1,0 +1,131 @@
+"aesthetics & cores":
+  "coquette":
+    - "#coquette"
+    - "#coquette aesthetic"
+    - "#coquette core"
+  "princess/doll":
+    - "#princesscore"
+    - "#dollcore"
+    - "#dollette"
+  "fairy/cottage":
+    - "#fairy aesthetic"
+    - "#cottagecore"
+    - "#farmcore"
+  "nostalgia":
+    - "#nostalgia"
+    - "#retro"
+    - "#vintage aesthetic"
+  "color cores":
+    - "#pinkcore"
+    - "#girly aesthetic"
+    - "#light aesthetic"
+  "internet cores":
+    - "#y2k aesthetic"
+    - "#kawaiicore"
+    - "#kisscore"
+  "emotional/abstract":
+    - "#longing"
+    - "#thoughtful"
+    - "#the feminine urge"
+"fashion":
+  - "#fashion"
+  - "#style"
+  - "#outfit"
+  - "#ootd"
+  - "#womenswear"
+  - "#menswear"
+  - "#streetwear"
+  - "#high fashion"
+  - "#haute couture"
+  - "#ready to wear"
+  - "#runway fashion"
+  - "#luxury fashion"
+  - "#slow fashion"
+"clothing":
+  "dresses":
+    - "#mini dress"
+    - "#maxi dress"
+    - "#cocktail dress"
+    - "#wedding dress"
+    - "#evening dress"
+  "tops":
+    - "#blouse"
+    - "#crop top"
+    - "#sheer blouse"
+    - "#turtleneck"
+  "bottoms":
+    - "#skirt"
+    - "#mini skirt"
+    - "#pants"
+    - "#jeans"
+  "outerwear":
+    - "#blazer"
+    - "#jacket"
+    - "#flight jacket"
+  "sets & specials":
+    - "#overalls"
+    - "#dungarees"
+    - "#robe"
+"fabrics, materials & construction":
+  "fabrics":
+    - "#silk"
+    - "#lace"
+    - "#tulle"
+    - "#velvet"
+    - "#denim"
+    - "#satin"
+  "techniques":
+    - "#embroidery"
+    - "#crochet"
+    - "#knitting"
+  "surface":
+    - "#sheer"
+    - "#shiny"
+    - "#iridescent"
+"color & palette":
+  "core colors":
+    - "#black"
+    - "#white"
+    - "#pink"
+    - "#red"
+    - "#green"
+    - "#cream"
+    - "#turquoise"
+    - "#gray"
+  "multi color":
+    - "#multicolor"
+    - "#pastel"
+    - "#rainbow"
+"gender/identity":
+  - "#woman"
+  - "#man"
+  - "#nonbinary"
+  - "#trans"
+  - "#genderfluid"
+  - "#androgynous"
+  - "#femme"
+  - "#masc"
+  - "#gender expression"
+"accessories & styling":
+  "shoes":
+    - "#loafers"
+    - "#derby shoes"
+    - "#yeezy"
+  "jewelry":
+    - "#necklace"
+    - "#beetle wing earrings"
+  "details":
+    - "#ribbons"
+    - "#gloves"
+    - "#belted"
+"beauty, hair & makeup":
+  "hair":
+    - "#hairstyle"
+    - "#long hair"
+    - "#natural hairstyle"
+  "makeup":
+    - "#makeup"
+    - "#winged eyeliner"
+  "face adjacent":
+    - "#glam girl"
+    - "#beauty"
