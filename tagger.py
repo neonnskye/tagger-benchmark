@@ -122,7 +122,7 @@ class Tagger:
     def run_prompt(self):
         logger.info("Starting OpenRouter API...")
         with OpenRouter(api_key=os.getenv("OPENROUTER_API_KEY")) as client:
-            for model_name in MODEL_LIST[-2:]:  # FIXME prompt all
+            for model_name in MODEL_LIST:
                 logger.info(f"Sending request to model: '{model_name}'")
                 response = client.chat.send(
                     model=model_name,
@@ -136,9 +136,10 @@ class Tagger:
                 match = re.search(r"/(.*)", model_name)
                 if match:
                     file_name = match.group(1)
-                output_path = RESPONSE_OUTPUT_DIR / f"{file_name}.md"
+                output_file = f"{file_name}.md"
+                output_path = RESPONSE_OUTPUT_DIR / output_file
 
-                logger.info(f"Writing response to '{output_path}'")
+                logger.info(f"Writing response to '{output_file}'")
                 with open(output_path, "w", encoding="utf-8") as output_file:
                     output_file.write(response.choices[0].message.content)
 
