@@ -1,7 +1,12 @@
+import logging
+
 from PIL import Image
 from wdtagger import Tagger as WDTagger
 
 import config
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 MASTER_TAG_LIST_PATH = "tags/master.yaml"
 
@@ -33,6 +38,7 @@ IMAGE_METADATA_TEMPLATE = """## Image {}
 
 class Tagger:
     def __init__(self):
+        logger.info("Initializing WDTagger...")
         self.wdtagger = WDTagger()
         self.image_list = config.IMAGES_CAPTIONS.keys()
 
@@ -42,12 +48,17 @@ class Tagger:
         self.system_prompt = None
         self.user_prompt = None
 
+        logger.info("Generating prompts...")
         self.generate_system_prompt()
         self.generate_user_prompt()
+        logger.info("Prompts generated and saved")
 
     def run_wdtagger(self):
+        logger.info("Starting WD14 tagging...")
         images = [Image.open(image_path) for image_path in self.image_list]
+        logger.info(f"Loaded {len(images)} images to be tagged")
         self.wdtagger_results = self.wdtagger.tag(images)
+        logger.info("WD14 tagging completed")
 
     def generate_system_prompt(self):
         with open(SYSTEM_PROMPT_TEMPLATE_PATH, "r", encoding="utf-8") as system_prompt_template_file:
