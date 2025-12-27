@@ -53,21 +53,18 @@ Each image input consists of:
 - When in doubt, select the more general or conservative tag
 - If criteria are not met for an image, stop and do not proceed; indicate an invalid state
 
-# Output Format (Strict YAML)
+# Output Format (Strict JSON)
 
-Respond only with YAML. Do not provide explanations or markdown.
+Respond only with JSON. Do not provide explanations or markdown.
 
 Output order must match the input sequence (Image 1 to Image 6).
 
 ## Output Schema
 
-Your YAML response must follow this structure:
+Your JSON response must follow this structure:
 
-```yaml
-# Each entry in the list corresponds to an image in order
-tags:
-  - image: "<image-index: 1-6>"
-    tags: [ "<Tag 1>", "<Tag 2>", "<Tag 3>", "<Tag 4>", "<Tag 5>" ] # 5 or 6 tags from the pool
+```json
+{}
 ```
 
 All selected tags must be present in the provided global tag pool. Return exactly 5–6 tags per image.
@@ -86,5 +83,5 @@ A response is valid only if:
 
 - Every tag is present verbatim in the global tag pool
 - Each image receives exactly 5–6 tags
-- Output is valid YAML and contains nothing else
+- Output is valid JSON and contains nothing else
 - The image order is strictly preserved

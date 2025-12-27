@@ -1,0 +1,72 @@
+{
+  "results": [
+    // Each entry in the list corresponds to an image in order
+    {
+      "image": 1,
+      "tags": [
+        // 5 to 6 tags from the pool
+        "tag1",
+        "tag2",
+        "tag3",
+        "tag4",
+        "tag5"
+      ]
+    },
+    {
+      "image": 2,
+      "tags": [
+        // 5 to 6 tags from the pool
+        "tag1",
+        "tag2",
+        "tag3",
+        "tag4",
+        "tag5",
+        "tag6"
+      ]
+    },
+    {
+      "image": 3,
+      "tags": [
+        // 5 to 6 tags from the pool
+        "tag1",
+        "tag2",
+        "tag3",
+        "tag4",
+        "tag5"
+      ]
+    },
+    {
+      "image": 4,
+      "tags": [
+        // 5 to 6 tags from the pool
+        "tag1",
+        "tag2",
+        "tag3",
+        "tag4",
+        "tag5"
+      ]
+    },
+    {
+      "image": 5,
+      "tags": [
+        // 5 to 6 tags from the pool
+        "tag1",
+        "tag2",
+        "tag3",
+        "tag4",
+        "tag5"
+      ]
+    },
+    {
+      "image": 6,
+      "tags": [
+        // 5 to 6 tags from the pool
+        "tag1",
+        "tag2",
+        "tag3",
+        "tag4",
+        "tag5"
+      ]
+    }
+  ]
+}

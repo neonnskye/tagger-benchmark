@@ -30,6 +30,8 @@ IMAGE_METADATA_TEMPLATE = """## Image {}
 ```"""
 
 PROMPT_TEMPLATE_PATH = "templates/prompt.md"
+OUTPUT_TEMPLATE_PATH = "templates/output.jsonc"
+
 PROMPT_OUTPUT_PATH = "outputs/prompt.md"
 
 
@@ -62,8 +64,11 @@ class Tagger:
             image_metadata = IMAGE_METADATA_TEMPLATE.format(idx, image_tags, image_caption)
             prompt_template_args.append(image_metadata)
 
+        with open(OUTPUT_TEMPLATE_PATH, "r", encoding="utf-8") as output_template_file:
+            prompt_template_args.append(output_template_file.read())
+
         generated_prompt = prompt_template.format(*prompt_template_args)
-        
+
         with open(PROMPT_OUTPUT_PATH, "w", encoding="utf-8") as prompt_output_file:
             prompt_output_file.write(generated_prompt)
 
