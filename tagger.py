@@ -1,12 +1,18 @@
 import logging
+import os
+import time
 
 from PIL import Image
+from dotenv import load_dotenv
+from openrouter import OpenRouter
 from wdtagger import Tagger as WDTagger
 
 import config
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 MASTER_TAG_LIST_PATH = "tags/master.yaml"
 
@@ -16,6 +22,20 @@ JSON_OUTPUT_TEMPLATE_PATH = "templates/prompt/output.json"
 
 SYSTEM_PROMPT_OUTPUT_PATH = "outputs/prompt/system.md"
 USER_PROMPT_OUTPUT_PATH = "outputs/prompt/user.md"
+
+MODEL_LIST = [
+    "google/gemini-3-pro-preview",
+    "google/gemini-3-flash-preview",
+    "google/gemini-2.5-pro",
+    "anthropic/claude-sonnet-4.5",
+    "anthropic/claude-opus-4.5",
+    "x-ai/grok-4",
+    "openai/gpt-5"
+    "openai/gpt-5.2",
+    "openai/o4-mini-high",
+    "deepseek/deepseek-v3.2",
+    "deepseek/deepseek-chat-v3-0324",
+]
 
 MASTER_TAG_LIST_TEMPLATE = """```yaml
 {}
@@ -52,6 +72,8 @@ class Tagger:
         self.generate_system_prompt()
         self.generate_user_prompt()
         logger.info("Prompts generated and saved")
+
+        self.run_prompt()
 
     def run_wdtagger(self):
         logger.info("Starting WD14 tagging...")
@@ -92,6 +114,21 @@ class Tagger:
 
         with open(USER_PROMPT_OUTPUT_PATH, "w", encoding="utf-8") as user_prompt_template_file:
             user_prompt_template_file.write(self.user_prompt)
+
+    def run_prompt(self):
+        with OpenRouter(api_key=os.getenv("OPENROUTER_API_KEY")) as client:
+            for model in MODEL_LIST[-2:]:  # FIXME prompt all
+                response = client.chat.send(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": self.system_prompt},
+                        {"role": "user", "content": self.user_prompt}
+                    ]
+                )
+
+                print(model)
+                print(response.choices[0].message.content)
+                time.sleep(5)
 
 
 if __name__ == "__main__":
