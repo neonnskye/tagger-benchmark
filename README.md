@@ -1,6 +1,6 @@
 # Tumblr Tagging Automation
 
-## The problem
+## Overview
 
 When posting to platforms like Tumblr (or any other social media), tags/hashtags are important for discoverability.
 However:
@@ -9,7 +9,9 @@ However:
 - It introduces manual overhead where things could have been automated
 - Quality and consistency can vary between posts
 
-## The solution
+This project explores an automated pipeline that generates relevant, consistent tags for image-based social media posts.
+
+## Implementation
 
 ![Explainer](assets/explainer.png)
 
