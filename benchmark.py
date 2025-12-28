@@ -11,7 +11,7 @@ from openpyxl.styles import Font, Border, Side, PatternFill
 from PIL import Image
 import config
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 BENCHMARK_TEMPLATE_PATH = "templates/benchmark.xlsx"
@@ -36,6 +36,21 @@ class Styles:
         fill_type="solid",
         start_color="BFBFBF",
         end_color="BFBFBF"
+    )
+    blue_fill = PatternFill(
+        fill_type="solid",
+        start_color="0070C0",
+        end_color="0070C0"
+    )
+    yellow_fill = PatternFill(
+        fill_type="solid",
+        start_color="FFFF00",
+        end_color="FFFF00"
+    )
+    red_fill = PatternFill(
+        fill_type="solid",
+        start_color="C00000",
+        end_color="C00000"
     )
     all_borders = Border(
         left=thin_side,
@@ -146,9 +161,9 @@ class Benchmark:
         logger.info(f"Parsed a total of {tags_parsed} unique tags")
 
         # For debugging
-        with open("out.json", "w", encoding="utf-8") as out_file:
-            safe_json = make_json_safe(self.responses)
-            json.dump(safe_json, out_file, indent=2)
+        # with open("out.json", "w", encoding="utf-8") as out_file:
+        #     safe_json = make_json_safe(self.responses)
+        #     json.dump(safe_json, out_file, indent=2)
 
     def prep_result_sheet(self):
         with open(USER_PROMPT_PATH, "r", encoding="utf-8") as user_prompt_file:
@@ -195,24 +210,41 @@ class Benchmark:
         for image_name, image_data in self.responses.items():
             tag_column = BENCHMARK_START_COLUMN
             for tag_name, models_selected in image_data["tag_index"].items():
-                num_models_selected = len(models_selected)
-                num_models_not_selected = self.num_total_models - num_models_selected
-                models_not_selected = self.all_model_names - models_selected
-                if tag_name not in self.master_tag_list:
-                    pass
-
                 # Tag labels
                 label_cell = self.ws.cell(row=tag_row, column=tag_column)
                 label_cell.value = tag_name
                 label_cell.font = Styles.bold_font
                 label_cell.border = Styles.all_borders
 
+                num_models_selected = len(models_selected)
+                # num_models_not_selected = self.num_total_models - num_models_selected
+                # models_not_selected = self.all_model_names - models_selected
+
+                gold_tag = False
+                if (num_models_selected / self.num_total_models) >= 0.7:
+                    gold_tag = True
+
+                invalid_tag = False
+                if tag_name not in self.master_tag_list:
+                    invalid_tag = True
+
                 for model_name, index in model_name_indexes.items():
                     data_row = tag_row + index
+                    data_cell = self.ws.cell(row=data_row, column=tag_column)
                     if model_name in models_selected:
-                        data_cell = self.ws.cell(row=data_row, column=tag_column)
-                        data_cell.fill = Styles.gray_fill
-                        data_cell.border = Styles.all_borders
+                        if gold_tag:
+                            data_cell.fill = Styles.blue_fill
+                            data_cell.value = 1
+                        else:
+                            data_cell.fill = Styles.gray_fill
+                        if invalid_tag:
+                            data_cell.fill = Styles.red_fill
+                            data_cell.value = -1
+                    else:
+                        if gold_tag:
+                            data_cell.fill = Styles.yellow_fill
+                            data_cell.value = -0.5
+                    data_cell.border = Styles.all_borders
 
                 tag_column += 1
             tag_row += (len(self.all_model_names) + 2)
