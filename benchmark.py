@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 import config
+import yaml
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -24,12 +25,36 @@ def make_json_safe(obj):
 
 class Benchmark:
     def __init__(self):
+        self.master_tag_list = set()
+        self.all_model_names = set()
+        self.num_total_models = 0
+        self.load_references()
+
         self.response_file_paths = {}
         self.find_response_file_paths()
 
         self.responses = {}
         self.parse_responses()
         self.analyze_responses()
+
+    def load_references(self):
+        def extract_master_tag_list(obj):
+            if isinstance(obj, dict):
+                for value in obj.values():
+                    extract_master_tag_list(value)
+            elif isinstance(obj, list):
+                for item in obj:
+                    if isinstance(item, str) and item.startswith('#'):
+                        self.master_tag_list.add(item[1:])
+                    else:
+                        extract_master_tag_list(item)
+
+        with open(MASTER_TAG_LIST_PATH, 'r', encoding='utf-8') as master_tag_file:
+            master_tag_data = yaml.safe_load(master_tag_file)
+        extract_master_tag_list(master_tag_data)
+
+        self.all_model_names = {model.split("/", 1)[1] for model in config.MODEL_LIST}
+        self.num_total_models = len(self.all_model_names)
 
     def find_response_file_paths(self):
         logging.info("Scanning responses...")
@@ -82,14 +107,13 @@ class Benchmark:
             json.dump(safe_json, out_file, indent=2)
 
     def analyze_responses(self):
-        model_names = {model.split("/", 1)[1] for model in config.MODEL_LIST}
-        num_total_models = len(model_names)
-
         for image_name, image_data in self.responses.items():
             for tag, models_selected in image_data["tag_index"].items():
                 num_models_selected = len(models_selected)
-                num_models_not_selected = num_total_models - num_models_selected
-                models_not_selected = model_names - models_selected
+                num_models_not_selected = self.num_total_models - num_models_selected
+                models_not_selected = self.all_model_names - models_selected
+                if tag not in self.master_tag_list:
+                    logger.info(f"'{tag}' not in master tag list")
 
 
 if __name__ == "__main__":
