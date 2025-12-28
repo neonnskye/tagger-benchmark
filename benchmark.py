@@ -6,10 +6,18 @@ from pathlib import Path
 import config
 import yaml
 
+from openpyxl import Workbook, load_workbook
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+BENCHMARK_TEMPLATE_PATH = "templates/benchmark.xlsx"
+BENCHMARK_OUTPUT_PATH = "results/results.xlsx"
+
 MASTER_TAG_LIST_PATH = "tags/master.yaml"
+SYSTEM_PROMPT_PATH = "outputs/prompt/system.md"
+USER_PROMPT_PATH = "outputs/prompt/user.md"
+
 RESPONSE_OUTPUT_DIR = Path("outputs")
 
 
@@ -35,7 +43,7 @@ class Benchmark:
 
         self.responses = {}
         self.parse_responses()
-        self.analyze_responses()
+        self.run_analysis()
 
     def load_references(self):
         def extract_master_tag_list(obj):
@@ -106,14 +114,21 @@ class Benchmark:
             safe_json = make_json_safe(self.responses)
             json.dump(safe_json, out_file, indent=2)
 
-    def analyze_responses(self):
+    def run_analysis(self):
+        wb = load_workbook(BENCHMARK_TEMPLATE_PATH)
+        ws = wb["Benchmark"]
+
+        ws.cell(row=1, column=1).value = "hello world"
+
         for image_name, image_data in self.responses.items():
             for tag, models_selected in image_data["tag_index"].items():
                 num_models_selected = len(models_selected)
                 num_models_not_selected = self.num_total_models - num_models_selected
                 models_not_selected = self.all_model_names - models_selected
                 if tag not in self.master_tag_list:
-                    logger.info(f"'{tag}' not in master tag list")
+                    pass
+
+        wb.save(BENCHMARK_OUTPUT_PATH)
 
 
 if __name__ == "__main__":
