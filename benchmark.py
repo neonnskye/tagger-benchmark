@@ -104,7 +104,8 @@ class Benchmark:
         found_file_paths = [p for p in RESPONSE_OUTPUT_DIR.iterdir() if p.is_file()]
         for file_path in found_file_paths:
             for model_name in config.MODEL_LIST:
-                if file_path.name[:-3] in model_name:
+                short_name = model_name.split("/", 1)[1]  # Extract name after provider/
+                if file_path.stem == short_name:  # Use .stem for exact match without extension
                     self.response_file_paths[model_name] = file_path
         logging.info(f"Found {len(self.response_file_paths)} valid response files")
 
