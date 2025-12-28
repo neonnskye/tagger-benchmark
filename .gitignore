@@ -1,7 +1,5 @@
 .idea/
 __pycache__/
 .env
-tags/master.txt
 todo.txt
-out.json
 results/
