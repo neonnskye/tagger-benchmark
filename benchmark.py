@@ -6,12 +6,12 @@ from pathlib import Path
 import yaml
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image as XLImage
-from openpyxl.styles import Font, Border, Side
+from openpyxl.styles import Font, Border, Side, PatternFill
 
 from PIL import Image
 import config
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 BENCHMARK_TEMPLATE_PATH = "templates/benchmark.xlsx"
@@ -32,6 +32,11 @@ from dataclasses import dataclass
 class Styles:
     bold_font = Font(bold=True)
     thin_side = Side(style="thin")
+    gray_fill = PatternFill(
+        fill_type="solid",
+        start_color="BFBFBF",
+        end_color="BFBFBF"
+    )
     all_borders = Border(
         left=thin_side,
         right=thin_side,
@@ -140,9 +145,9 @@ class Benchmark:
         logger.info(f"Parsed a total of {tags_parsed} unique tags")
 
         # For debugging
-        # with open("out.json", "w", encoding="utf-8") as out_file:
-        #     safe_json = make_json_safe(self.responses)
-        #     json.dump(safe_json, out_file, indent=2)
+        with open("out.json", "w", encoding="utf-8") as out_file:
+            safe_json = make_json_safe(self.responses)
+            json.dump(safe_json, out_file, indent=2)
 
     def prep_result_sheet(self):
         with open(USER_PROMPT_PATH, "r", encoding="utf-8") as user_prompt_file:
@@ -163,11 +168,8 @@ class Benchmark:
 
             with Image.open(image_path) as img:
                 img_width, img_height = img.size
-                logger.debug(f"img_width: {img_width}, img_height: {img_height}")
 
             col_width = self.ws.column_dimensions["B"].width
-            row_height = self.ws.row_dimensions[row].height
-            logger.debug(f"col_width: {col_width}, row_height: {row_height}")
 
             scaling_factor = img_width / (col_width * 7)
             logger.debug(f"scaling_factor: {img_width} / ({col_width} * 7) = {scaling_factor}")
@@ -180,6 +182,14 @@ class Benchmark:
 
     def run_analysis(self):
         logger.info("Running benchmark...")
+
+        # To place tag data dynamically
+        model_name_indexes = {}
+        for model_name in self.all_model_names:
+            matches = [i for i, s in enumerate(config.MODEL_LIST) if re.search(rf"/({model_name})$", s)]
+            model_name_indexes[model_name] = matches[0] + 1
+        logger.debug(f"model_name_indexes: {model_name_indexes}")
+
         tag_row = BENCHMARK_START_ROW
         for image_name, image_data in self.responses.items():
             tag_column = BENCHMARK_START_COLUMN
@@ -195,6 +205,13 @@ class Benchmark:
                 label_cell.value = tag_name
                 label_cell.font = Styles.bold_font
                 label_cell.border = Styles.all_borders
+
+                for model_name, index in model_name_indexes.items():
+                    data_row = tag_row + index
+                    if model_name in models_selected:
+                        data_cell = self.ws.cell(row=data_row, column=tag_column)
+                        data_cell.fill = Styles.gray_fill
+                        data_cell.border = Styles.all_borders
 
                 tag_column += 1
             tag_row += (len(self.all_model_names) + 2)
