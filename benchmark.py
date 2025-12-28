@@ -130,10 +130,17 @@ class Benchmark:
             self.image_caption_list = re.findall(r"Caption\n\n```\n(.*)", user_prompt)
             self.image_tag_list = re.findall(r"WD14 tags\n\n```\n(.*)", user_prompt)
 
-        for row in range(1, 67, 13):
-            self.ws[f"A{row}"] = f"Row {row} text"  # set text
-            img = XLImage(self.image_list[0])
-            self.ws.add_image(img, f"B{row}")  # overlay image on cell
+        num_images = len(self.image_list)
+        num_models = len(self.all_model_names)
+        rows_per_block = 2 + num_models  # caption + tags + models
+
+        for i, row in enumerate(range(1, 1 + rows_per_block * num_images, rows_per_block)):
+            self.ws[f"A{row}"] = self.image_caption_list[i]
+            self.ws[f"A{row + 1}"] = self.image_tag_list[i]
+
+            # Insert image
+            img = XLImage(self.image_list[i])
+            self.ws.add_image(img, f"B{row}")
 
     def run_analysis(self):
         for image_name, image_data in self.responses.items():
