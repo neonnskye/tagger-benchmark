@@ -1,3 +1,12 @@
+from enum import Enum
+
+
+class Scoring(float, Enum):
+    AGREEMENT_HIT_BONUS = 1.0  # 70% of models agree, and model was in that 70%
+    AGREEMENT_MISS_PENALTY = -0.5  # 70% of models agree, but model was in the 30%
+    HALLUCINATION_PENALTY = -1.0  # Tag not in master pool (invalid)
+
+
 IMAGES_CAPTIONS = {
     "images/image1.jpg": "Mui..♡",
     "images/image2.jpg": "🩶⌨️🎧💿",

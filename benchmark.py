@@ -4,11 +4,11 @@ import re
 from pathlib import Path
 
 import yaml
+from PIL import Image
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import Font, Border, Side, PatternFill
 
-from PIL import Image
 import config
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -25,10 +25,7 @@ USER_PROMPT_PATH = "outputs/prompt/user.md"
 
 RESPONSE_OUTPUT_DIR = Path("outputs")
 
-from dataclasses import dataclass
 
-
-@dataclass
 class Styles:
     bold_font = Font(bold=True)
     thin_side = Side(style="thin")
@@ -234,16 +231,16 @@ class Benchmark:
                     if model_name in models_selected:
                         if gold_tag:
                             data_cell.fill = Styles.blue_fill
-                            data_cell.value = 1
+                            data_cell.value = config.Scoring.AGREEMENT_HIT_BONUS
                         else:
                             data_cell.fill = Styles.gray_fill
                         if invalid_tag:
                             data_cell.fill = Styles.red_fill
-                            data_cell.value = -1
+                            data_cell.value = config.Scoring.HALLUCINATION_PENALTY
                     else:
                         if gold_tag:
                             data_cell.fill = Styles.yellow_fill
-                            data_cell.value = -0.5
+                            data_cell.value = config.Scoring.AGREEMENT_MISS_PENALTY
                     data_cell.border = Styles.all_borders
 
                 tag_column += 1
