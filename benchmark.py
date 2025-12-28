@@ -3,10 +3,11 @@ import logging
 import re
 from pathlib import Path
 
-import config
 import yaml
+from openpyxl import load_workbook
+from openpyxl.drawing.image import Image as XLImage
 
-from openpyxl import Workbook, load_workbook
+import config
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -15,7 +16,6 @@ BENCHMARK_TEMPLATE_PATH = "templates/benchmark.xlsx"
 BENCHMARK_OUTPUT_PATH = "results/results.xlsx"
 
 MASTER_TAG_LIST_PATH = "tags/master.yaml"
-SYSTEM_PROMPT_PATH = "outputs/prompt/system.md"
 USER_PROMPT_PATH = "outputs/prompt/user.md"
 
 RESPONSE_OUTPUT_DIR = Path("outputs")
@@ -43,7 +43,17 @@ class Benchmark:
 
         self.responses = {}
         self.parse_responses()
+
+        self.image_list = list(config.IMAGES_CAPTIONS.keys())
+        self.image_caption_list = []
+        self.image_tag_list = []
+
+        self.wb = load_workbook(BENCHMARK_TEMPLATE_PATH)
+        self.ws = self.wb["Benchmark"]
+        self.prep_result_sheet()
+
         self.run_analysis()
+        self.wb.save(BENCHMARK_OUTPUT_PATH)
 
     def load_references(self):
         def extract_master_tag_list(obj):
@@ -110,16 +120,22 @@ class Benchmark:
         logger.info(f"Parsed a total of {tags_parsed} unique tags")
 
         # For debugging
-        with open("out.json", "w", encoding="utf-8") as out_file:
-            safe_json = make_json_safe(self.responses)
-            json.dump(safe_json, out_file, indent=2)
+        # with open("out.json", "w", encoding="utf-8") as out_file:
+        #     safe_json = make_json_safe(self.responses)
+        #     json.dump(safe_json, out_file, indent=2)
+
+    def prep_result_sheet(self):
+        with open(USER_PROMPT_PATH, "r", encoding="utf-8") as user_prompt_file:
+            user_prompt = user_prompt_file.read()
+            self.image_caption_list = re.findall(r"Caption\n\n```\n(.*)", user_prompt)
+            self.image_tag_list = re.findall(r"WD14 tags\n\n```\n(.*)", user_prompt)
+
+        for row in range(1, 67, 13):
+            self.ws[f"A{row}"] = f"Row {row} text"  # set text
+            img = XLImage(self.image_list[0])
+            self.ws.add_image(img, f"B{row}")  # overlay image on cell
 
     def run_analysis(self):
-        wb = load_workbook(BENCHMARK_TEMPLATE_PATH)
-        ws = wb["Benchmark"]
-
-        ws.cell(row=1, column=1).value = "hello world"
-
         for image_name, image_data in self.responses.items():
             for tag, models_selected in image_data["tag_index"].items():
                 num_models_selected = len(models_selected)
@@ -127,8 +143,6 @@ class Benchmark:
                 models_not_selected = self.all_model_names - models_selected
                 if tag not in self.master_tag_list:
                     pass
-
-        wb.save(BENCHMARK_OUTPUT_PATH)
 
 
 if __name__ == "__main__":
