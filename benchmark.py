@@ -82,15 +82,14 @@ class Benchmark:
             json.dump(safe_json, out_file, indent=2)
 
     def analyze_responses(self):
-        all_models = set(config.MODEL_LIST)
-        num_total_models = len(all_models)
+        model_names = {model.split("/", 1)[1] for model in config.MODEL_LIST}
+        num_total_models = len(model_names)
 
         for image_name, image_data in self.responses.items():
             for tag, models_selected in image_data["tag_index"].items():
                 num_models_selected = len(models_selected)
                 num_models_not_selected = num_total_models - num_models_selected
-
-                models_not_selected = all_models - models_selected
+                models_not_selected = model_names - models_selected
 
 
 if __name__ == "__main__":
