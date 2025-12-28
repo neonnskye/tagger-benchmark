@@ -1,7 +1,7 @@
 import json
 import logging
-from pathlib import Path
 import re
+from pathlib import Path
 
 import config
 
@@ -12,11 +12,22 @@ MASTER_TAG_LIST_PATH = "tags/master.yaml"
 RESPONSE_OUTPUT_DIR = Path("outputs")
 
 
+def make_json_safe(obj):
+    if isinstance(obj, set):
+        return sorted(obj)  # or list(obj)
+    if isinstance(obj, dict):
+        return {k: make_json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [make_json_safe(v) for v in obj]
+    return obj
+
+
 class Benchmark:
     def __init__(self):
         self.response_file_paths = {}
         self.find_response_file_paths()
 
+        self.responses = {}
         self.parse_response_files()
 
     def find_response_file_paths(self):
@@ -31,18 +42,33 @@ class Benchmark:
     def parse_response_files(self):
         logging.info("Parsing responses...")
         for response_file_path in self.response_file_paths.values():
+            model_name = response_file_path.name[:-3]
+
             with open(response_file_path, "r", encoding="utf-8") as response_file:
                 response_raw = response_file.read()
 
             match = re.search(r"({[\W\w]+})", response_raw)
             if not match:
                 logging.warning(f"Skipped invalid JSON response: '{response_file_path}'...")
-
             response = json.loads(match.group(1))
+
             image_results = response["results"]
-            for image_result in image_results:
-                tags = [tag for tag in image_result["tags"]]
-                logger.info(tags)
+            for image_idx, image_result in enumerate(image_results):
+                image_key = f"image_{image_idx + 1}"
+                tags = set(image_result["tags"])
+
+                if image_key not in self.responses:
+                    self.responses[image_key] = {
+                        "by_model": {},
+                        "tag_index": {},
+                    }
+
+                self.responses[image_key]["by_model"][model_name] = tags
+
+        # For debugging
+        with open("out.json", "w", encoding="utf-8") as out_file:
+            safe_json = make_json_safe(self.responses)
+            json.dump(safe_json, out_file, indent=2)
 
 
 if __name__ == "__main__":

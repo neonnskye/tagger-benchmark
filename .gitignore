@@ -3,3 +3,4 @@ __pycache__/
 .env
 tags/master.txt
 todo.txt
+out.json
