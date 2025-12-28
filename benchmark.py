@@ -28,7 +28,8 @@ class Benchmark:
         self.find_response_file_paths()
 
         self.responses = {}
-        self.parse_response_files()
+        self.parse_responses()
+        self.analyze_responses()
 
     def find_response_file_paths(self):
         logging.info("Scanning responses...")
@@ -39,7 +40,8 @@ class Benchmark:
                     self.response_file_paths[model_name] = file_path
         logging.info(f"Found {len(self.response_file_paths)} valid response files")
 
-    def parse_response_files(self):
+    def parse_responses(self):
+        tags_parsed = 0
         logging.info("Parsing responses...")
         for response_file_path in self.response_file_paths.values():
             model_name = response_file_path.name[:-3]
@@ -55,7 +57,8 @@ class Benchmark:
             image_results = response["results"]
             for image_idx, image_result in enumerate(image_results):
                 image_key = f"image_{image_idx + 1}"
-                tags = set(image_result["tags"])
+                tags = {tag.lstrip("#") for tag in image_result["tags"]}
+                tags_parsed += len(tags)
 
                 if image_key not in self.responses:
                     self.responses[image_key] = {
@@ -65,10 +68,29 @@ class Benchmark:
 
                 self.responses[image_key]["by_model"][model_name] = tags
 
+                tag_index = self.responses[image_key]["tag_index"]
+                for tag in tags:
+                    if tag not in tag_index:
+                        tag_index[tag] = set()
+                    tag_index[tag].add(model_name)
+
+        logger.info(f"Parsed a total of {tags_parsed} unique tags")
+
         # For debugging
         with open("out.json", "w", encoding="utf-8") as out_file:
             safe_json = make_json_safe(self.responses)
             json.dump(safe_json, out_file, indent=2)
+
+    def analyze_responses(self):
+        all_models = set(config.MODEL_LIST)
+        num_total_models = len(all_models)
+
+        for image_name, image_data in self.responses.items():
+            for tag, models_selected in image_data["tag_index"].items():
+                num_models_selected = len(models_selected)
+                num_models_not_selected = num_total_models - num_models_selected
+
+                models_not_selected = all_models - models_selected
 
 
 if __name__ == "__main__":
