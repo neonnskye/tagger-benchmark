@@ -7,6 +7,7 @@ import yaml
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image as XLImage
 
+from PIL import Image
 import config
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -139,8 +140,24 @@ class Benchmark:
             self.ws[f"A{row + 1}"] = self.image_tag_list[i]
 
             # Insert image
-            img = XLImage(self.image_list[i])
-            self.ws.add_image(img, f"B{row}")
+            image_path = self.image_list[i]
+
+            with Image.open(image_path) as img:
+                img_width, img_height = img.size
+                logger.debug(f"img_width: {img_width}, img_height: {img_height}")
+
+            col_width = self.ws.column_dimensions["B"].width
+            row_height = self.ws.row_dimensions[row].height
+            logger.debug(f"col_width: {col_width}, row_height: {row_height}")
+
+            scaling_factor = img_width / (col_width * 7)
+            logger.debug(f"scaling_factor: {img_width} / ({col_width} * 7) = {scaling_factor}")
+
+            xl_img = XLImage(image_path)
+            xl_img.width = int(img_width / scaling_factor)
+            xl_img.height = int(img_height / scaling_factor)
+
+            self.ws.add_image(xl_img, f"B{row}")
 
     def run_analysis(self):
         for image_name, image_data in self.responses.items():
