@@ -6,6 +6,7 @@ from pathlib import Path
 import yaml
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image as XLImage
+from openpyxl.styles import Font, Border, Side
 
 from PIL import Image
 import config
@@ -16,10 +17,27 @@ logger = logging.getLogger(__name__)
 BENCHMARK_TEMPLATE_PATH = "templates/benchmark.xlsx"
 BENCHMARK_OUTPUT_PATH = "results/results.xlsx"
 
+BENCHMARK_START_COLUMN = 5
+BENCHMARK_START_ROW = 1
+
 MASTER_TAG_LIST_PATH = "tags/master.yaml"
 USER_PROMPT_PATH = "outputs/prompt/user.md"
 
 RESPONSE_OUTPUT_DIR = Path("outputs")
+
+from dataclasses import dataclass
+
+
+@dataclass
+class Styles:
+    bold_font = Font(bold=True)
+    thin_side = Side(style="thin")
+    all_borders = Border(
+        left=thin_side,
+        right=thin_side,
+        top=thin_side,
+        bottom=thin_side
+    )
 
 
 def make_json_safe(obj):
@@ -55,6 +73,7 @@ class Benchmark:
 
         self.run_analysis()
         self.wb.save(BENCHMARK_OUTPUT_PATH)
+        logger.info(f"Benchmark results saved to '{BENCHMARK_OUTPUT_PATH}'")
 
     def load_references(self):
         def extract_master_tag_list(obj):
@@ -160,13 +179,25 @@ class Benchmark:
             self.ws.add_image(xl_img, f"B{row}")
 
     def run_analysis(self):
+        logger.info("Running benchmark...")
+        tag_row = BENCHMARK_START_ROW
         for image_name, image_data in self.responses.items():
-            for tag, models_selected in image_data["tag_index"].items():
+            tag_column = BENCHMARK_START_COLUMN
+            for tag_name, models_selected in image_data["tag_index"].items():
                 num_models_selected = len(models_selected)
                 num_models_not_selected = self.num_total_models - num_models_selected
                 models_not_selected = self.all_model_names - models_selected
-                if tag not in self.master_tag_list:
+                if tag_name not in self.master_tag_list:
                     pass
+
+                # Tag labels
+                label_cell = self.ws.cell(row=tag_row, column=tag_column)
+                label_cell.value = tag_name
+                label_cell.font = Styles.bold_font
+                label_cell.border = Styles.all_borders
+
+                tag_column += 1
+            tag_row += (len(self.all_model_names) + 2)
 
 
 if __name__ == "__main__":
