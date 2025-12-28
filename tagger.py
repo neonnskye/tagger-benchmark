@@ -27,20 +27,6 @@ USER_PROMPT_OUTPUT_PATH = "outputs/prompt/user.md"
 
 RESPONSE_OUTPUT_DIR = Path("outputs")
 
-MODEL_LIST = [
-    "google/gemini-3-pro-preview",
-    "google/gemini-3-flash-preview",
-    "google/gemini-2.5-pro",
-    "anthropic/claude-sonnet-4.5",
-    "anthropic/claude-opus-4.5",
-    "x-ai/grok-4",
-    "openai/gpt-5",
-    "openai/gpt-5.2",
-    "openai/o4-mini-high",
-    "deepseek/deepseek-v3.2",
-    "deepseek/deepseek-chat-v3-0324",
-]
-
 MASTER_TAG_LIST_TEMPLATE = """```yaml
 {}
 ```"""
@@ -122,7 +108,7 @@ class Tagger:
     def run_prompt(self):
         logger.info("Starting OpenRouter API...")
         with OpenRouter(api_key=os.getenv("OPENROUTER_API_KEY")) as client:
-            for model_name in MODEL_LIST:
+            for model_name in config.MODEL_LIST:
                 logger.info(f"Sending request to model: '{model_name}'")
                 response = client.chat.send(
                     model=model_name,
